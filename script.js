@@ -1,60 +1,96 @@
-console.log('olá, mundo');
+const modal = document.querySelector('.modal-container')
+const tbody = document.querySelector('tbody')
+const sNome = document.querySelector('#m-nome')
+const sFuncao = document.querySelector('#m-funcao')
+const sSalario = document.querySelector('#m-salario')
+const btnSalvar = document.querySelector('#btnSalvar')
 
-// [CRU] JavaScript Básico
-// CREATE
-// READ
-// UPDATE
-// DELETE
+let itens
+let id
 
-const miniTwitter = { 
-    usuarios: [
-        {
-            userame:    'thisena',
-        }
+function openModal(edit = false, index = 0) {
+  modal.classList.add('active')
 
-    ],
-    posts: [  
-        {
-            id: 1,
-            owner: 'thisena',
-            content: 'Meu primeiro post'
-         }
-    ]
-};
-
-// CREAT
-function criarPost({dados}) {
-    miniTwitter.posts.push({
-        id: miniTwitter.posts.length + 1,
-        owner: dados.owner
-        content: dados.content
-    })
-}
-criarPost({ owner: 'thisena', content 'Segundo tweet'});
-console.log(miniTwitter.post) [ { owner: 'thisenaa'}]
-
-// READ
-function pegaPosts() {
-    return miniTwitter.posts;
-}
-console.log(pegaPost()) [ { owner: 'thisenaa', content}]
-
-// UPDATE
-function atualizaContentPost(id, novo) {   
-    const postQueSeraAtualizado = pegaPosts().find(post) => {
-        return post.id === id; 
+  modal.onclick = e => {
+    if (e.target.className.indexOf('modal-container') !== -1) {
+      modal.classList.remove('active')
     }
-    console.log(postQueSeraAtualizado) [{ id: 1, owner: 'thisena'}]
+  }
+
+  if (edit) {
+    sNome.value = itens[index].nome
+    sFuncao.value = itens[index].funcao
+    sSalario.value = itens[index].salario
+    id = index
+  } else {
+    sNome.value = ''
+    sFuncao.value = ''
+    sSalario.value = ''
+  }
+  
+}
+
+function editItem(index) {
+
+  openModal(true, index)
+}
+
+function deleteItem(index) {
+  itens.splice(index, 1)
+  setItensBD()
+  loadItens()
+}
+
+function insertItem(item, index) {
+  let tr = document.createElement('tr')
+
+  tr.innerHTML = `
+    <td>${item.nome}</td>
+    <td>${item.funcao}</td>
+    <td>R$ ${item.salario}</td>
+    <td class="acao">
+      <button onclick="editItem(${index})"><i class='bx bx-edit' ></i></button>
+    </td>
+    <td class="acao">
+      <button onclick="deleteItem(${index})"><i class='bx bx-trash'></i></button>
+    </td>
+  `
+  tbody.appendChild(tr)
+}
+
+btnSalvar.onclick = e => {
+  
+  if (sNome.value == '' || sFuncao.value == '' || sSalario.value == '') {
+    return
+  }
+
+  e.preventDefault();
+
+  if (id !== undefined) {
+    itens[id].nome = sNome.value
+    itens[id].funcao = sFuncao.value
+    itens[id].salario = sSalario.value
+  } else {
+    itens.push({'nome': sNome.value, 'funcao': sFuncao.value, 'salario': sSalario.value})
+  }
+
+  setItensBD()
+
+  modal.classList.remove('active')
+  loadItens()
+  id = undefined
+}
+
+function loadItens() {
+  itens = getItensBD()
+  tbody.innerHTML = ''
+  itens.forEach((item, index) => {
+    insertItem(item, index)
+  })
 
 }
-atualizaContentPost (1, 'Novo conteúdo do post')
-console.log(pegaPosts())
 
-// DELETE 
-function apagaPost(id) {
-   const listaPostAtualizada = pegaPosts().filter(postAtual) ==>
-        return postAtual.id !== id; 
-}
+const getItensBD = () => JSON.parse(localStorage.getItem('dbfunc')) ?? []
+const setItensBD = () => localStorage.setItem('dbfunc', JSON.stringify(itens))
 
-    miniTwitter.posts = listaPostAtualizada;
-function apagaPost(1)
+loadItens()
